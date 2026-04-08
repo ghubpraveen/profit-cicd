@@ -6,7 +6,7 @@ pipeline {
     }
    
     environment {
-        SCRIPT_PATH = "/home/praveen/deploy.sh"
+        SCRIPT_PATH = "/opt/scripts/deploy.sh"
     }
 
     stages {
