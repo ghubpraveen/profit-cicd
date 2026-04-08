@@ -9,9 +9,9 @@ pipeline {
         stage('Process Commmit') {
             steps{
                 script{
-                    env.GIT_COMMIT.take (7)
+                    def shortHash = env.GIT_COMMIT.take(7)
                     echo "Processing Commit: ${shortHash}"
-                    sh "bash ${env.SCRIPT_pATH} ${shortHash}"
+                    sh "bash ${env.SCRIPT_PATH} ${shortHash}"
                 }
             }
         }
