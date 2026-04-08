@@ -19,6 +19,7 @@ pipeline {
                     def branchName = env.GIT_BRANCH ?: sh(script: 'git rev-parse --abbrev-ref Head', returnStdout: true).trim()
                     
                     echo "Processing Commit: ${fullHash}"
+                    echo "Processing Branch" ${branchName}
                     
                     // Call the script and pass the hash
                     sh "bash ${env.SCRIPT_PATH} ${fullHash} ${branchName}"
