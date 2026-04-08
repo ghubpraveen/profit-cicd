@@ -11,7 +11,7 @@ pipeline {
     }
 
     stages {
-        stage('Processing Commmit') {
+        stage('Process Commmit') {
             steps{
                 script{
                     def shortHash = env.GIT_COMMIT.take(7)
