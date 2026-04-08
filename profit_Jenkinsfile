@@ -38,7 +38,7 @@ pipeline {
             }
         }
 
-        stage('Git Management & Smart Build') {
+        stage('Git Management & Build') {
             steps {
                 script {
                     // Standard Git actions
