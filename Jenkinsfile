@@ -1,9 +1,9 @@
 pipeline {
     agent any
-
-    // triggers {
-    //     pollSCM('* * * * *')
-    // }
+    
+    triggers {
+        pollSCM('* * * * *')
+    }
 
     environment {
         SCRIPT_PATH = "/home/praveen/app_scripts/deploy.sh"
