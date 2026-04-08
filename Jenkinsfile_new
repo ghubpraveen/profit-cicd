@@ -33,8 +33,7 @@ pipeline {
         stage('Automated Build & Deploy') {
             steps {
                 script {
-                    echo "Automated Trigger for Branch: ${env.TARGET_BRANCH}"
-                    echo "Commit Hash: ${env.GIT_COMMIT}"
+                    env.SHORT_HASH = env.GIT_COMMIT.take(7)
 
                     // Calling your server script with automated values
                     // Note: We use env.JOB_NAME and env.WORKSPACE provided by Jenkins
