@@ -4,10 +4,10 @@ pipeline {
     triggers {
         pollSCM('* * * * *')
     }
-    
+
 //Script path 
     environment {
-        SCRIPT_PATH = "/opt/scripts/deploy.sh"
+        SCRIPT_PATH = "/home/praveen/app_scripts/deploy.sh"
     }
 
     stages {
