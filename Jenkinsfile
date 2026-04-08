@@ -15,7 +15,7 @@ pipeline {
                 script {
                     // Try to get hash from env; if null, fetch it from git directly
                     def commitHash = env.GIT_COMMIT ?: sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                    def shortHash = commitHash.take(7)
+                    def fullHash = commitHash
                     
                     echo "Processing Commit: ${fullHash}"
                     
