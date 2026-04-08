@@ -42,7 +42,7 @@ pipeline {
                     def cause = currentBuild.getBuildCauses()[0].shortDescription
                     
                     // 2. Pass them to the script as arguments
-                    // Order: $1=hash, $2=branch, $3=buildNum, $4=cause
+                    
                     sh "bash ${env.SCRIPT_PATH} '${fullHash}' '${branch}' '${buildNum}' '${cause}'"
                 }
             }
