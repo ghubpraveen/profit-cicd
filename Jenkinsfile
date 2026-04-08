@@ -4,6 +4,7 @@ pipeline {
     triggers {
         pollSCM('* * * * *')
     }
+    
 //Script path 
     environment {
         SCRIPT_PATH = "/opt/scripts/deploy.sh"
