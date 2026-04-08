@@ -35,8 +35,7 @@ pipeline {
             steps {
                 script {
                     // 1. Gather Variables
-                    def commit = sh(script: "git rev-parse -- HEAD", returnStdout: true).trim()
-                    def fullHash = commit
+                    def fullHash = sh(script: "git rev-parse -- HEAD", returnStdout: true).trim()
                     def branch = sh(script: "git rev-parse --abbrev-ref HEAD", returnStdout: true).trim()
                     def buildNum = env.BUILD_NUMBER
                     def cause = currentBuild.getBuildCauses()[0].shortDescription
