@@ -10,7 +10,6 @@ pipeline {
     }
 
     stages {
-<<<<<<< HEAD
         stage('Process Commit') {
             steps {
                 script {
@@ -18,16 +17,10 @@ pipeline {
                     def commitHash = env.GIT_COMMIT ?: sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                     def shortHash = commitHash.take(7)
                     
-=======
-        stage('Processing Commmit') {
-            steps{
-                script{
-                    def shortHash = env.GIT_COMMIT.take(7)
->>>>>>> c83fce0 (Testing CommitHASH15)
-                    echo "Processing Commit: ${shortHash}"
+                    echo "Processing Commit: ${fullHash}"
                     
                     // Call the script and pass the hash
-                    sh "bash ${env.SCRIPT_PATH} ${shortHash}"
+                    sh "bash ${env.SCRIPT_PATH} ${fullHash}"
                 }
             }
         }
