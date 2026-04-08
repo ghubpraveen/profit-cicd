@@ -1,45 +1,53 @@
 pipeline {
     agent any
 
-    parameters {
-        string(name: 'JOB_NAME', defaultValue: '', description: 'Job Name (e.g., My-Java-App)')
-        string(name: 'BRANCH', defaultValue: 'master', description: 'Git Branch to pull')
-        string(name: 'BUILD_ENV', defaultValue: 'UAT', description: 'Target Environment')
-        choice(name: 'REQUIRED', choices: ['Build', 'Files_Copy', 'Build_And_Files_Copy'], description: 'Action to perform')
-        string(name: 'WORKSPACE_PATH', defaultValue: '/var/jenkins_home/workspace', description: 'Path to workspace')
-        choice(name: 'VALIDATE_HASHES', choices: ['no', 'yes'], description: 'Smart Build (Skip if no changes)')
-        string(name: 'BUILD_USER', defaultValue: 'Jenkins-Admin', description: 'User triggering the build')
-        string(name: 'RAM_Memory', defaultValue: '8192', description: 'Node RAM limit for frontend')
-    }
-
+    // Defining the environment variables that were previously manual parameters
     environment {
-        // Software paths from your script
+        // Paths to your software and script on the server
         JAVA_HOME = "/u01/sfw/jdk-17.0.5"
         M2_HOME   = "/u01/sfw/apache-maven-3.6.3"
         PATH      = "${JAVA_HOME}/bin:${M2_HOME}/bin:${env.PATH}"
-        
-        // GChat URL from your original script
-        GCHAT_URL = "https://chat.googleapis.com/v1/spaces/AAAAkRPquRE/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=8P_S4Exea74xKAFnKua2-q7Tnaawpkk7hwhESi8L4f0&messageReplyOption=REPLY_MESSAGE"
-        
-        // Script location on server
         SCRIPT_PATH = "/u01/scripts/java_deployment.sh"
+        
+        // Automated Metadata (Replaces manual selection)
+        // Jenkins sets BRANCH_NAME automatically in Multibranch pipelines
+        // or we can extract it from the SCM data
+        TARGET_BRANCH = "${env.BRANCH_NAME ?: env.GIT_BRANCH}"
+        
+        // Fixed variables for your environment
+        BUILD_ENV = "UAT" 
+        REQUIRED  = "Build_And_Files_Copy" // Assuming full build on every commit
+        VALIDATE_HASHES = "yes"            // Enable your script's smart check
+        RAM_MEMORY = "8192"
+        
+        // GChat for notifications
+        GCHAT_URL = "https://chat.googleapis.com/v1/spaces/AAAAkRPquRE/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=8P_S4Exea74xKAFnKua2-q7Tnaawpkk7hwhESi8L4f0"
+    }
+
+    triggers {
+        // This tells Jenkins to check for changes or wait for a Webhook push
+        pollSCM('H/5 * * * *') 
     }
 
     stages {
-        stage('Deploy Process') {
+        stage('Automated Build & Deploy') {
             steps {
                 script {
-                    // Running the shell script with all 8 parameters
+                    echo "Automated Trigger for Branch: ${env.TARGET_BRANCH}"
+                    echo "Commit Hash: ${env.GIT_COMMIT}"
+
+                    // Calling your server script with automated values
+                    // Note: We use env.JOB_NAME and env.WORKSPACE provided by Jenkins
                     sh """
                         bash ${env.SCRIPT_PATH} \
-                        '${params.JOB_NAME}' \
-                        '${params.BRANCH}' \
-                        '${params.BUILD_ENV}' \
-                        '${params.REQUIRED}' \
-                        '${params.WORKSPACE_PATH}' \
-                        '${params.VALIDATE_HASHES}' \
-                        '${params.BUILD_USER}' \
-                        '${params.RAM_Memory}'
+                        '${env.JOB_NAME}' \
+                        '${env.TARGET_BRANCH}' \
+                        '${env.BUILD_ENV}' \
+                        '${env.REQUIRED}' \
+                        '${env.WORKSPACE}' \
+                        '${env.VALIDATE_HASHES}' \
+                        'Git-Webhook' \
+                        '${env.RAM_MEMORY}'
                     """
                 }
             }
@@ -48,23 +56,16 @@ pipeline {
 
     post {
         success {
-            script {
-                // Replicating your script's success message
-                def timeSeconds = currentBuild.duration / 1000
-                sh """
-                    curl -sH 'Content-Type: application/json' -X POST ${env.GCHAT_URL} \
-                    -d '{"text": "✅ *${params.JOB_NAME} Build Successful*\\nEnvironment: ${params.BUILD_ENV}\\nUser: ${params.BUILD_USER}\\nDuration: ${timeSeconds}s"}'
-                """
-            }
+            sh """
+                curl -sH 'Content-Type: application/json' -X POST ${env.GCHAT_URL} \
+                -d '{"text": "🚀 *Auto-Build Success*\\nJob: ${env.JOB_NAME}\\nBranch: ${env.TARGET_BRANCH}\\nCommit: ${env.GIT_COMMIT}"}'
+            """
         }
         failure {
-            script {
-                // Replicating your script's failure/alert message
-                sh """
-                    curl -sH 'Content-Type: application/json' -X POST ${env.GCHAT_URL} \
-                    -d '{"text": "❌ *${params.JOB_NAME} Build Failed*\\nEnvironment: ${params.BUILD_ENV}\\nCheck logs at: ${env.BUILD_URL}console"}'
-                """
-            }
+            sh """
+                curl -sH 'Content-Type: application/json' -X POST ${env.GCHAT_URL} \
+                -d '{"text": "❌ *Auto-Build Failed*\\nBranch: ${env.TARGET_BRANCH}\\nCheck logs: ${env.BUILD_URL}"}'
+            """
         }
     }
 }
